@@ -1,0 +1,25 @@
+# 設定文字檔換行符號（LF）
+* text=auto
+
+# Unity 專案常見文字檔
+*.cs       text
+*.shader   text
+*.json     text
+*.xml      text
+*.txt      text
+
+# 二進位檔案（不轉換換行符號）
+*.png      binary
+*.jpg      binary
+*.jpeg     binary
+*.gif      binary
+*.mp3      binary
+*.wav      binary
+*.ogg      binary
+*.fbx      binary
+*.prefab   binary
+*.unity    binary
+*.dll      binary
+*.exe      binary
+*.apk      binary
+*.aab      binary
