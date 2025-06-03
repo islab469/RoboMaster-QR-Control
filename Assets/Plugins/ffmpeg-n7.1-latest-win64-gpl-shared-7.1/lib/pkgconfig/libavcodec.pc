@@ -1,13 +1,3 @@
-prefix=${pcfiledir}/../..
-exec_prefix=${prefix}
-libdir=${prefix}/lib
-includedir=${prefix}/include
-
-Name: libavcodec
-Description: FFmpeg codec library
-Version: 61.19.101
-Requires: 
-Requires.private: libswresample >= 5.3.100, libavutil >= 59.39.100
-Conflicts:
-Libs: -L${libdir}  -lavcodec 
-Cflags: -I${includedir}
+version https://git-lfs.github.com/spec/v1
+oid sha256:7ff2e6ea79ebb7be2f0b84d767afcdac016807288f6058db3905f67e06cf974a
+size 312

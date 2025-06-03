@@ -1,13 +1,3 @@
-prefix=${pcfiledir}/../..
-exec_prefix=${prefix}
-libdir=${prefix}/lib
-includedir=${prefix}/include
-
-Name: libavformat
-Description: FFmpeg container format library
-Version: 61.7.100
-Requires: 
-Requires.private: libavcodec >= 61.19.101, libswresample >= 5.3.100, libavutil >= 59.39.100
-Conflicts:
-Libs: -L${libdir}  -lavformat 
-Cflags: -I${includedir}
+version https://git-lfs.github.com/spec/v1
+oid sha256:327518a6b1eddb3b848ff96d029de6fc5247e37fd9bb3b4b3fb7477575066e0b
+size 349
