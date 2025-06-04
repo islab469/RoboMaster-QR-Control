@@ -4,24 +4,26 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Collections.Generic;
+using System.Threading;
 
-/// <summary>
-/// 負責將 QR Code 指令轉換為無人機控制命令並透過 UDP 發送
-/// </summary>
 public class DroneController : MonoBehaviour
 {
     [Header("無人機網路設定")]
     public string droneIP = "192.168.10.1";
     public int dronePort = 8889;
+    public int listenPort = 8890; // 🆕 新增監聽回應 Port
 
     [Header("指令設定")]
-    public int forwardDistance = 20; // 前進距離（公分）
-    public int turnAngle = 90; // 轉向角度（度）
+    public int forwardDistance = 20;
+    public int turnAngle = 90;
 
     private UdpClient udpClient;
+    private UdpClient listenerClient; // 🆕 監聽用 UDP
     private IPEndPoint endPoint;
+    private Thread listenerThread;
 
-    // 指令對應表
+    public event Action<string> OnDroneResponse; // 🆕 事件：回傳訊息通知 UI
+
     private readonly Dictionary<string, string> commandMap = new Dictionary<string, string>
     {
         { "forward", "forward {0}" },
@@ -37,28 +39,85 @@ public class DroneController : MonoBehaviour
     void OnDestroy()
     {
         CloseUDP();
+        StopListening();
     }
 
-    /// <summary>
-    /// 初始化 UDP 連接
-    /// </summary>
-    private void InitializeUDP()
+    public bool InitializeUDP()
     {
         try
         {
             udpClient = new UdpClient();
             endPoint = new IPEndPoint(IPAddress.Parse(droneIP), dronePort);
             Debug.Log("UDP 連接已初始化");
+
+            StartListening(); // 🆕 開始監聽無人機回應
+
+            string testCommand = "command";
+            byte[] sendBytes = Encoding.ASCII.GetBytes(testCommand);
+            udpClient.Send(sendBytes, sendBytes.Length, endPoint);
+
+            return true;
         }
         catch (Exception e)
         {
             Debug.LogError($"UDP 初始化失敗: {e.Message}");
+            return false;
         }
     }
 
-    /// <summary>
-    /// 關閉 UDP 連接
-    /// </summary>
+    private void StartListening()
+    {
+        try
+        {
+            listenerClient = new UdpClient(listenPort);
+            listenerThread = new Thread(ListenForResponse);
+            listenerThread.IsBackground = true;
+            listenerThread.Start();
+            Debug.Log("開始監聽無人機回應");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"啟動監聽失敗: {e.Message}");
+        }
+    }
+
+    private void ListenForResponse()
+    {
+        try
+        {
+            IPEndPoint remoteEP = new IPEndPoint(IPAddress.Any, listenPort);
+            while (true)
+            {
+                byte[] data = listenerClient.Receive(ref remoteEP);
+                string response = Encoding.ASCII.GetString(data);
+                Debug.Log($"收到無人機回應: {response}");
+
+                UnityMainThreadDispatcher.Instance.Enqueue(() =>
+                {
+                    OnDroneResponse?.Invoke(response);
+                });
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"監聽回應失敗: {e.Message}");
+        }
+    }
+
+    public void StopListening()
+    {
+        if (listenerThread != null)
+        {
+            listenerThread.Abort();
+            listenerThread = null;
+        }
+        if (listenerClient != null)
+        {
+            listenerClient.Close();
+            listenerClient = null;
+        }
+    }
+
     private void CloseUDP()
     {
         if (udpClient != null)
@@ -68,10 +127,6 @@ public class DroneController : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 發送控制指令到無人機
-    /// </summary>
-    /// <param name="qrCodeText">QR Code 掃描到的文字</param>
     public void SendCommand(string qrCodeText)
     {
         if (udpClient == null)
@@ -82,19 +137,15 @@ public class DroneController : MonoBehaviour
 
         try
         {
-            // 將 QR Code 文字轉換為小寫並去除空白
             string command = qrCodeText.Trim().ToLower();
 
-            // 檢查是否為有效指令
             if (commandMap.TryGetValue(command, out string commandFormat))
             {
-                // 根據指令類型設定參數
                 string fullCommand = string.Format(
                     commandFormat,
                     command == "forward" ? forwardDistance : turnAngle
                 );
 
-                // 轉換為 byte 陣列並發送
                 byte[] sendBytes = Encoding.ASCII.GetBytes(fullCommand);
                 udpClient.Send(sendBytes, sendBytes.Length, endPoint);
 

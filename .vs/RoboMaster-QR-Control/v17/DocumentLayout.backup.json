@@ -1,0 +1,71 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\fcd26\\Unity\\RoboMaster-QR-Control\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{AC9723CF-2461-005F-9C60-2594F0709452}|Assembly-CSharp.csproj|c:\\users\\fcd26\\unity\\robomaster-qr-control\\assets\\scripts\\dronevideoreceiver.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AC9723CF-2461-005F-9C60-2594F0709452}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\dronevideoreceiver.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AC9723CF-2461-005F-9C60-2594F0709452}|Assembly-CSharp.csproj|c:\\users\\fcd26\\unity\\robomaster-qr-control\\assets\\scripts\\dronecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AC9723CF-2461-005F-9C60-2594F0709452}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\dronecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AC9723CF-2461-005F-9C60-2594F0709452}|Assembly-CSharp.csproj|c:\\users\\fcd26\\unity\\robomaster-qr-control\\assets\\scripts\\qrcodescanner.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AC9723CF-2461-005F-9C60-2594F0709452}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\qrcodescanner.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "DroneController.cs",
+              "DocumentMoniker": "C:\\Users\\fcd26\\Unity\\RoboMaster-QR-Control\\Assets\\Scripts\\DroneController.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\DroneController.cs",
+              "ToolTip": "C:\\Users\\fcd26\\Unity\\RoboMaster-QR-Control\\Assets\\Scripts\\DroneController.cs",
+              "RelativeToolTip": "Assets\\Scripts\\DroneController.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-04T06:17:44.588Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "DroneVideoReceiver.cs",
+              "DocumentMoniker": "C:\\Users\\fcd26\\Unity\\RoboMaster-QR-Control\\Assets\\Scripts\\DroneVideoReceiver.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\DroneVideoReceiver.cs",
+              "ToolTip": "C:\\Users\\fcd26\\Unity\\RoboMaster-QR-Control\\Assets\\Scripts\\DroneVideoReceiver.cs",
+              "RelativeToolTip": "Assets\\Scripts\\DroneVideoReceiver.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-04T06:17:43.423Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "QRCodeScanner.cs",
+              "DocumentMoniker": "C:\\Users\\fcd26\\Unity\\RoboMaster-QR-Control\\Assets\\Scripts\\QRCodeScanner.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\QRCodeScanner.cs",
+              "ToolTip": "C:\\Users\\fcd26\\Unity\\RoboMaster-QR-Control\\Assets\\Scripts\\QRCodeScanner.cs",
+              "RelativeToolTip": "Assets\\Scripts\\QRCodeScanner.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAmAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-04T06:16:56.714Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

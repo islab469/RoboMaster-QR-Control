@@ -1,27 +1,37 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
+﻿using System;
+using System.Collections;
+using UnityEngine;
+using TMPro;
 using ZXing;
-using System;
+using System.Collections.Generic;
 
-/// <summary>
-/// 負責掃描畫面中的 QR Code 並解析其內容
-/// </summary>
 public class QRCodeScanner : MonoBehaviour
 {
-    [Header("UI 元件")]
-    public Text qrCodeText; // 用於顯示掃描結果的文字元件
-    public RawImage sourceImage; // 來源影像（從 DroneVideoReceiver 獲取）
-
     [Header("掃描設定")]
-    public float scanInterval = 0.5f; // 掃描間隔（秒）
+    public RenderTexture sourceRenderTexture;
+    public float scanInterval = 0.5f;
 
     private BarcodeReader barcodeReader;
-    private float nextScanTime;
+    private Coroutine scanCoroutine;
+    private bool isScanning = false;
+
+    private TextMeshProUGUI qrCodeText;
     private DroneController droneController;
+
+    private Texture2D readTexture;
+    private int failedScanCount = 0; // 🆕 失敗次數統計
+    private const int maxFailedScans = 5;
+
+    private HashSet<string> validCommands = new HashSet<string> { "forward", "left", "right" }; // 🆕 合法指令表
 
     void Start()
     {
-        // 初始化 ZXing 掃描器
+        InitializeQRCodeReader();
+        readTexture = new Texture2D(sourceRenderTexture.width, sourceRenderTexture.height, TextureFormat.RGB24, false);
+    }
+
+    private void InitializeQRCodeReader()
+    {
         barcodeReader = new BarcodeReader
         {
             AutoRotate = true,
@@ -30,81 +40,113 @@ public class QRCodeScanner : MonoBehaviour
                 TryHarder = true
             }
         };
-
-        droneController = GetComponent<DroneController>();
-        if (droneController == null)
-        {
-            Debug.LogWarning("找不到 DroneController 元件");
-        }
-
-        // 設定初始文字
-        UpdateQRCodeText("等待掃描 QR Code...");
     }
 
-    void Update()
+    public void StartScanning()
     {
-        // 檢查是否到達下一次掃描時間
-        if (Time.time >= nextScanTime)
+        if (!isScanning)
+        {
+            isScanning = true;
+            scanCoroutine = StartCoroutine(ScanLoop());
+        }
+    }
+
+    public void StopScanning()
+    {
+        if (isScanning)
+        {
+            isScanning = false;
+            if (scanCoroutine != null)
+            {
+                StopCoroutine(scanCoroutine);
+            }
+        }
+    }
+
+    private IEnumerator ScanLoop()
+    {
+        while (isScanning)
         {
             ScanQRCode();
-            nextScanTime = Time.time + scanInterval;
+            yield return new WaitForSecondsRealtime(scanInterval);
         }
     }
 
-    /// <summary>
-    /// 執行 QR Code 掃描
-    /// </summary>
     private void ScanQRCode()
     {
-        if (sourceImage.texture == null) return;
+        if (sourceRenderTexture == null) return;
 
         try
         {
-            // 獲取當前顯示的材質
-            Texture2D texture = sourceImage.texture as Texture2D;
-            if (texture == null)
-            {
-                Debug.LogWarning("無法獲取影像材質");
-                return;
-            }
+            RenderTexture.active = sourceRenderTexture;
+            readTexture.ReadPixels(new Rect(0, 0, sourceRenderTexture.width, sourceRenderTexture.height), 0, 0);
+            readTexture.Apply();
+            RenderTexture.active = null;
 
-            // 獲取像素資料
-            Color32[] pixels = texture.GetPixels32();
-
-            // 使用 ZXing 解碼
-            var result = barcodeReader.Decode(pixels, texture.width, texture.height);
+            Color32[] pixels = readTexture.GetPixels32();
+            var result = barcodeReader.Decode(pixels, readTexture.width, readTexture.height);
 
             if (result != null)
             {
-                string decodedText = result.Text;
-                UpdateQRCodeText($"掃描到 QR Code: {decodedText}");
+                string decodedText = result.Text.Trim().ToLower();
+                Debug.Log($"掃描結果: {decodedText}");
 
-                // 如果有連接 DroneController，則發送指令
-                if (droneController != null)
+                if (validCommands.Contains(decodedText))
                 {
-                    droneController.SendCommand(decodedText);
+                    UpdateQRCodeText($"掃描到有效指令: {decodedText}", Color.green);
+
+                    if (droneController != null)
+                    {
+                        droneController.SendCommand(decodedText);
+                    }
+
+                    failedScanCount = 0; // 成功掃描歸零
+                }
+                else
+                {
+                    UpdateQRCodeText($"無效指令: {decodedText}", Color.red);
                 }
             }
             else
             {
-                UpdateQRCodeText("未偵測到 QR Code");
+                failedScanCount++;
+                UpdateQRCodeText("未偵測到 QR Code", Color.red);
+
+                if (failedScanCount >= maxFailedScans)
+                {
+                    Debug.LogWarning("連續未偵測到 QR Code，請調整鏡頭！");
+                }
             }
         }
         catch (Exception e)
         {
             Debug.LogError($"QR Code 掃描錯誤: {e.Message}");
-            UpdateQRCodeText("掃描發生錯誤");
+            UpdateQRCodeText("掃描發生錯誤", Color.red);
         }
     }
 
-    /// <summary>
-    /// 更新 UI 上的 QR Code 文字
-    /// </summary>
-    private void UpdateQRCodeText(string message)
+    private void UpdateQRCodeText(string message, Color color)
     {
         if (qrCodeText != null)
         {
             qrCodeText.text = message;
+            qrCodeText.color = color;
         }
+    }
+
+    public void SetQRCodeText(TextMeshProUGUI text)
+    {
+        qrCodeText = text;
+    }
+
+    public void SetDroneController(DroneController controller)
+    {
+        droneController = controller;
+        droneController.OnDroneResponse += OnDroneResponseReceived; // 🆕 訂閱無人機回應
+    }
+
+    private void OnDroneResponseReceived(string response)
+    {
+        UpdateQRCodeText($"無人機回應: {response}", Color.cyan);
     }
 }

@@ -153,6 +153,7 @@ public class DroneVideoReceiver : MonoBehaviour
 {
     [Header("UI Components")]
     public RawImage displayImage;
+    public RenderTexture renderTexture; // 🆕 新增 RenderTexture
 
     [Header("FFmpeg Settings")]
     [Tooltip("相對於 Assets 資料夾的 ffmpeg.exe 路徑，例如 'Plugins/ffmpeg-n7.1-latest-win64-gpl-shared-7.1/bin/ffmpeg.exe'")]
@@ -163,6 +164,9 @@ public class DroneVideoReceiver : MonoBehaviour
     public int frameHeight = 720;
 
     private IVideoStreamDecoder videoDecoder;
+
+    private Texture2D frameTexture; // 🆕 新增一個 Texture2D
+    private Color32[] pixelBuffer;  // 🆕 新增一個 Pixel 緩衝區
 
     void Start()
     {
@@ -181,10 +185,15 @@ public class DroneVideoReceiver : MonoBehaviour
 #else
         Debug.LogError("Unsupported platform for video decoding.");
 #endif
-        videoDecoder.StartStream();
+        frameTexture = new Texture2D(frameWidth, frameHeight, TextureFormat.RGB24, false);
+        pixelBuffer = new Color32[frameWidth * frameHeight];
 
-        if (displayImage != null)
-            displayImage.texture = videoDecoder.GetCurrentFrame();
+        if (displayImage != null && renderTexture != null)
+        {
+            displayImage.texture = renderTexture;
+        }
+
+        videoDecoder.StartStream();
     }
 
     void OnDestroy()
@@ -195,9 +204,13 @@ public class DroneVideoReceiver : MonoBehaviour
 
     void Update()
     {
-        if (displayImage != null && videoDecoder != null)
+        if (renderTexture != null && videoDecoder != null)
         {
-            displayImage.texture = videoDecoder.GetCurrentFrame();
+            Texture2D currentFrame = videoDecoder.GetCurrentFrame();
+            if (currentFrame != null)
+            {
+                Graphics.Blit(currentFrame, renderTexture); // ✅ 把 frame 貼到 RenderTexture
+            }
         }
     }
 }
@@ -243,4 +256,3 @@ public class UnityMainThreadDispatcher : MonoBehaviour
         }
     }
 }
-
